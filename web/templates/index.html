@@ -1,0 +1,365 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Travel Planner</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 25px;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #2563eb;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat {
+            background: #eff6ff;
+            padding: 18px;
+            border-radius: 10px;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 25px;
+            color: #2563eb;
+            margin-bottom: 5px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        button {
+            padding: 11px 18px;
+            border: none;
+            border-radius: 7px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .delete-button {
+            background: #dc2626;
+        }
+
+        .delete-button:hover {
+            background: #b91c1c;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        th {
+            background: #eff6ff;
+        }
+
+        .error {
+            padding: 12px;
+            background: #fee2e2;
+            color: #991b1b;
+            border-radius: 7px;
+            margin-bottom: 15px;
+        }
+
+        .chart {
+            display: flex;
+            align-items: end;
+            gap: 20px;
+            min-height: 190px;
+            overflow-x: auto;
+            padding: 15px 5px 0;
+        }
+
+        .bar-item {
+            min-width: 65px;
+            text-align: center;
+        }
+
+        .bar {
+            width: 42px;
+            margin: auto;
+            background: #3b82f6;
+            border-radius: 6px 6px 0 0;
+            min-height: 5px;
+        }
+
+        .bar-item span {
+            font-size: 12px;
+            display: block;
+            margin-top: 7px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            .form-grid,
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>✈ Travel Planner</h1>
+        <span>Планировщик путешествий</span>
+    </header>
+
+    <div class="card">
+        <h2>Моя статистика</h2>
+
+        <div class="stats">
+            <div class="stat">
+                <strong>{{ total_count }}</strong>
+                Всего путешествий
+            </div>
+
+            <div class="stat">
+                <strong>{{ "%.2f"|format(total_budget) }} €</strong>
+                Общий бюджет
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Добавить путешествие</h2>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form action="/travels" method="post">
+
+            <div class="form-grid">
+
+                <div>
+                    <label>Город</label>
+                    <input type="text" name="city"
+                           placeholder="Например, Париж" required>
+                </div>
+
+                <div>
+                    <label>Страна</label>
+                    <input type="text" name="country"
+                           placeholder="Например, Франция" required>
+                </div>
+
+                <div>
+                    <label>Дата начала</label>
+                    <input type="date" name="start_date" required>
+                </div>
+
+                <div>
+                    <label>Дата окончания</label>
+                    <input type="date" name="end_date" required>
+                </div>
+
+                <div>
+                    <label>Бюджет (€)</label>
+                    <input type="number" name="budget"
+                           min="0.01" step="0.01"
+                           placeholder="1000" required>
+                </div>
+
+                <div>
+                    <label>Описание</label>
+                    <input type="text" name="description"
+                           placeholder="Дополнительная информация">
+                </div>
+
+                <div class="full">
+                    <button type="submit">
+                        Добавить путешествие
+                    </button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Мои путешествия</h2>
+
+        <div class="table-wrapper">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Город</th>
+                        <th>Страна</th>
+                        <th>Начало</th>
+                        <th>Окончание</th>
+                        <th>Дней</th>
+                        <th>Бюджет</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for travel in travels %}
+
+                    <tr>
+                        <td>{{ travel.city }}</td>
+                        <td>{{ travel.country }}</td>
+                        <td>{{ travel.start_date.strftime("%d.%m.%Y") }}</td>
+                        <td>{{ travel.end_date.strftime("%d.%m.%Y") }}</td>
+                        <td>{{ travel.duration() }}</td>
+                        <td>{{ "%.2f"|format(travel.budget) }} €</td>
+
+                        <td>
+                            <form
+                                action="/travels/{{ travel.id }}/delete"
+                                method="post"
+                                onsubmit="return confirm('Удалить путешествие?')">
+
+                                <button class="delete-button" type="submit">
+                                    Удалить
+                                </button>
+
+                            </form>
+                        </td>
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="7">
+                            Путешествий пока нет.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Активность путешествий</h2>
+
+        {% if chart_data %}
+
+        <div class="chart">
+
+            {% for item in chart_data %}
+
+            <div class="bar-item">
+
+                <div class="bar"
+                     style="height: {{ (item.count / max_count * 140)|int }}px;">
+                </div>
+
+                <strong>{{ item.count }}</strong>
+
+                <span>{{ item.month }}</span>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <p>Пока нет данных для построения графика.</p>
+
+        {% endif %}
+    </div>
+
+    <footer>
+        <p>Travel Planner | Лабораторная работа №3 | Python</p>
+    </footer>
+
+</div>
+
+</body>
+</html>
